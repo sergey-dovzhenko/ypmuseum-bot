@@ -9,7 +9,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 telegram_bot_key = "8127384745:AAH9Ce83P1lYegIOrRlW261g4YVvl9WXKyg"
-telegram_chat_id = "-4849379875"
+telegram_chat_id = "-1003192948647"
 bot = telebot.TeleBot(telegram_bot_key)
 
 
@@ -41,10 +41,12 @@ for event_content in events_content:
         buy__available = event_content.find_element(By.CLASS_NAME, "buy__available").text
         
         message += "*" + action__text + "*" + "\n"
+        message += "\n"
         print(action__text)
         
         print(f"Всего билетов: {buy__available}")
         message += f"Всего билетов: {buy__available}" + "\n"
+        message += "\n"
 
         buy__button = event_content.find_element(By.CLASS_NAME, "buy__button")
         buy__button.click()
@@ -107,10 +109,12 @@ for event_content in events_content:
         buy__available = event_content.find_element(By.CLASS_NAME, "buy__available").text
         
         message += "*" + action__text + "*" + "\n"
+        message += "\n"
         print(action__text)
         
         print(f"Всего билетов: {buy__available}")
         message += f"Всего билетов: {buy__available}" + "\n"
+        message += "\n"
 
         buy__button = event_content.find_element(By.CLASS_NAME, "buy__button")
         buy__button.click()
