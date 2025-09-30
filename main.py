@@ -19,9 +19,9 @@ bot = telebot.TeleBot(telegram_bot_key)
 # )
 
 op = webdriver.ChromeOptions()
-op.add_argument('--headless')
-op.add_argument("--no-sandbox")
-op.add_argument("--disable-dev-shm-usage")
+# op.add_argument('--headless')
+# op.add_argument("--no-sandbox")
+# op.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=op)
 
 driver.maximize_window()
@@ -58,7 +58,11 @@ for event_content in events_content:
 
                 sliders = driver.find_elements(By.CLASS_NAME, "slide")
                 for slider in sliders:
-                    slider.click()
+                    
+                    
+                    # slider.click()
+                    driver.execute_script("arguments[0].click();", slider)
+        
                     time.sleep(3)
 
                     slide__day = slider.find_element(By.CLASS_NAME, "slide__day").text
@@ -126,7 +130,8 @@ for event_content in events_content:
 
                 sliders = driver.find_elements(By.CLASS_NAME, "slide")
                 for slider in sliders:
-                    slider.click()
+                    # slider.click()
+                    driver.execute_script("arguments[0].click();", slider)
                     time.sleep(3)
 
                     slide__day = driver.find_element(By.CLASS_NAME, "slide__day").text
