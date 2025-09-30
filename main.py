@@ -1,170 +1,106 @@
-# from bs4 import BeautifulSoup
+import os
+import telebot
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
-import telebot
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
-
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.chrome.options import Options
 
 telegram_bot_key = "8127384745:AAH9Ce83P1lYegIOrRlW261g4YVvl9WXKyg"
 telegram_chat_id = "-1003192948647"
+
 bot = telebot.TeleBot(telegram_bot_key)
 
-
-# driver = webdriver.Chrome (
-
-#     #executable_path = "/Users/sergeydovzhenko/Documents/skolkovo/chromedriver_mac64/chromedriver"
-# )
-
-op = webdriver.ChromeOptions()
-op.add_argument('--headless')
-op.add_argument("--no-sandbox")
-op.add_argument("--disable-dev-shm-usage")
-driver = webdriver.Chrome(options=op)
-
-driver.maximize_window()
+# Настройки браузера
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+driver = webdriver.Chrome(options=options)
 
 BASE_URL = "https://ypmuseum.tn-cloud.ru/?id=1&sid=43"
 
-driver.get(BASE_URL)
+def wait_for_element(by, value, timeout=10):
+    """Ожидаем появления элемента"""
+    try:
+        return WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((by, value))
+        )
+    except TimeoutException:
+        return None
 
-time.sleep(10)
 
-events_content = driver.find_elements(By.CLASS_NAME, "events__content")
-message = ""
+def parse_event(event_name: str) -> str:
+    """Парсинг конкретного события по названию"""
+    driver.get(BASE_URL)
+    wait_for_element(By.CLASS_NAME, "events__content")
 
-for event_content in events_content:
-    action__text = event_content.find_element(By.CLASS_NAME, "action__text").text
-    if action__text in ["Билет с экскурсионным обслуживанием по маршруту: Дом Толстого, Заповедник"]:
-        buy__available = event_content.find_element(By.CLASS_NAME, "buy__available").text
-        
-        message += "*" + action__text + "*" + "\n"
-        message += "\n"
-        print(action__text)
-        
-        print(f"Всего билетов: {buy__available}")
-        message += f"Всего билетов: {buy__available}" + "\n"
-        message += "\n"
+    events_content = driver.find_elements(By.CLASS_NAME, "events__content")
+    message = ""
 
-        buy__button = event_content.find_element(By.CLASS_NAME, "buy__button")
-        buy__button.click()
+    for event_content in events_content:
+        action_text = event_content.find_element(By.CLASS_NAME, "action__text").text
 
-        time.sleep(10)
+        if action_text == event_name:
+            available = event_content.find_element(By.CLASS_NAME, "buy__available").text
 
-        try:
-            if driver.find_element(By.CLASS_NAME, "swiper-container") is not None:
+            message += f"*{action_text}*\n\n"
+            message += f"Всего билетов: {available}\n\n"
 
-                sliders = driver.find_elements(By.CLASS_NAME, "slide")
-                for slider in sliders:
-                    
-                    
-                    # slider.click()
-                    driver.execute_script("arguments[0].click();", slider)
-        
-                    time.sleep(3)
+            # Жмём кнопку купить
+            event_content.find_element(By.CLASS_NAME, "buy__button").click()
+            wait_for_element(By.CLASS_NAME, "times__item")
 
-                    slide__day = slider.find_element(By.CLASS_NAME, "slide__day").text
-                    slide__month = slider.find_element(By.CLASS_NAME, "slide__month").text
-                    slide__weekday_text = slider.find_element(By.CLASS_NAME, "slide__weekday-text").text
+            try:
+                # Проверяем календарь
+                if driver.find_elements(By.CLASS_NAME, "swiper-container"):
+                    for slider in driver.find_elements(By.CLASS_NAME, "slide"):
+                        driver.execute_script("arguments[0].click();", slider)
+                        WebDriverWait(driver, 5).until(
+                            EC.presence_of_all_elements_located((By.CLASS_NAME, "times__item"))
+                        )
 
-                    print(f"Дата: {slide__day} {slide__month} ({slide__weekday_text})")
-                    message += f"Дата: {slide__day} {slide__month} ({slide__weekday_text})" + "\n"
+                        day = slider.find_element(By.CLASS_NAME, "slide__day").text
+                        month = slider.find_element(By.CLASS_NAME, "slide__month").text
+                        weekday = slider.find_element(By.CLASS_NAME, "slide__weekday-text").text
+                        message += f"Дата: {day} {month} ({weekday})\n"
 
-                    times__item = driver.find_elements(By.CLASS_NAME, "times__item")
-                    for time__item in times__item:
-                        
-                        times__time = time__item.find_element(By.CLASS_NAME, "times__time").text
-                        times__amount = time__item.find_element(By.CLASS_NAME, "times__amount").text
+                        for t in driver.find_elements(By.CLASS_NAME, "times__item"):
+                            time_ = t.find_element(By.CLASS_NAME, "times__time").text
+                            amount = t.find_element(By.CLASS_NAME, "times__amount").text
+                            message += f"Время: {time_} - {amount}\n"
+                        message += "\n"
+                else:
+                    date = driver.find_element(By.CLASS_NAME, "calendar-one-date").text
+                    message += f"Дата: {date}\n"
 
-                        print(f"Время: {times__time} - {times__amount}")
-                        message += f"Время: {times__time} - {times__amount}" + "\n"
+                    for t in driver.find_elements(By.CLASS_NAME, "times__item"):
+                        time_ = t.find_element(By.CLASS_NAME, "times__time").text
+                        amount = t.find_element(By.CLASS_NAME, "times__amount").text
+                        message += f"Время: {time_} - {amount}\n"
 
-                    message += "\n"
-        except NoSuchElementException:
-            times__item = driver.find_elements(By.CLASS_NAME, "times__item")
+            except NoSuchElementException:
+                message += "⚠️ Нет доступных дат или времени\n"
 
-            calendar_one_date = driver.find_element(By.CLASS_NAME, "calendar-one-date").text
-            print(f"Дата: {calendar_one_date}")
-            message += f"Дата: {calendar_one_date}" + "\n"
+            break
+    return message
 
-            for time__item in times__item:
-                
-                times__time = time__item.find_element(By.CLASS_NAME, "times__time").text
-                times__amount = time__item.find_element(By.CLASS_NAME, "times__amount").text
 
-                print(f"Время: {times__time} - {times__amount}")
-                message += f"Время: {times__time} - {times__amount}" + "\n"     
-        break
+if __name__ == "__main__":
+    events_to_check = [
+        "Билет с экскурсионным обслуживанием по маршруту: Дом Толстого, Заповедник",
+        "Билет с экскурсионным обслуживанием: дом Л.Н.Толстого, заповедник",
+    ]
 
-bot.send_message(chat_id=telegram_chat_id, text=message, disable_web_page_preview=False, parse_mode='Markdown')
+    for event in events_to_check:
+        msg = parse_event(event)
+        if msg:
+            bot.send_message(
+                chat_id=telegram_chat_id,
+                text=msg,
+                disable_web_page_preview=True,
+                parse_mode="Markdown"
+            )
 
-driver.get(BASE_URL)
-
-time.sleep(10)
-
-events_content = driver.find_elements(By.CLASS_NAME, "events__content")
-message = ""
-
-for event_content in events_content:
-    action__text = event_content.find_element(By.CLASS_NAME, "action__text").text
-    if action__text in ["Билет с экскурсионным обслуживанием: дом Л.Н.Толстого, заповедник"]:
-        buy__available = event_content.find_element(By.CLASS_NAME, "buy__available").text
-        
-        message += "*" + action__text + "*" + "\n"
-        message += "\n"
-        print(action__text)
-        
-        print(f"Всего билетов: {buy__available}")
-        message += f"Всего билетов: {buy__available}" + "\n"
-        message += "\n"
-
-        buy__button = event_content.find_element(By.CLASS_NAME, "buy__button")
-        buy__button.click()
-
-        time.sleep(10)
-
-        try:
-            if driver.find_element(By.CLASS_NAME, "swiper-container") is not None:
-
-                sliders = driver.find_elements(By.CLASS_NAME, "slide")
-                for slider in sliders:
-                    # slider.click()
-                    driver.execute_script("arguments[0].click();", slider)
-                    time.sleep(3)
-
-                    slide__day = driver.find_element(By.CLASS_NAME, "slide__day").text
-                    slide__month = driver.find_element(By.CLASS_NAME, "slide__month").text
-                    slide__weekday_text = driver.find_element(By.CLASS_NAME, "slide__weekday-text").text
-
-                    print(f"Дата: {slide__day} {slide__month} ({slide__weekday_text})")
-                    message += f"Дата: {slide__day} {slide__month} ({slide__weekday_text})" + "\n"
-
-                    times__item = driver.find_elements(By.CLASS_NAME, "times__item")
-                    for time__item in times__item:
-                        
-                        times__time = time__item.find_element(By.CLASS_NAME, "times__time").text
-                        times__amount = time__item.find_element(By.CLASS_NAME, "times__amount").text
-
-                        print(f"Время: {times__time} - {times__amount}")
-                        message += f"Время: {times__time} - {times__amount}" + "\n"
-                    message += "\n"
-
-        except NoSuchElementException:
-            times__item = driver.find_elements(By.CLASS_NAME, "times__item")
-
-            calendar_one_date = driver.find_element(By.CLASS_NAME, "calendar-one-date").text
-            print(f"Дата: {calendar_one_date}")
-            message += f"Дата: {calendar_one_date}" + "\n"
-
-            for time__item in times__item:
-                
-                times__time = time__item.find_element(By.CLASS_NAME, "times__time").text
-                times__amount = time__item.find_element(By.CLASS_NAME, "times__amount").text
-
-                print(f"Время: {times__time} - {times__amount}")
-                message += f"Время: {times__time} - {times__amount}" + "\n"     
-        break
-
-bot.send_message(chat_id=telegram_chat_id, text=message, disable_web_page_preview=False, parse_mode='Markdown')
+    driver.quit()
