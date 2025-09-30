@@ -2,7 +2,11 @@ name: Python application
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    # - cron: "*/15 * * * *"
+    - cron: "5 21 * * *"   # 00:05 MSK
+    - cron: "15 21 * * *"  # 00:15 MSK
+    - cron: "30 21 * * *"  # 00:30 MSK
+    - cron: "45 21 * * *"  # 00:45 MSK
   
   workflow_dispatch: # Ручной запуск
 
