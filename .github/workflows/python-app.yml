@@ -1,8 +1,8 @@
 name: Python application
 
 on:
-  # schedule: # Запускаем ежедневно в 08:15 утра UTC
-    # - cron: '00 5 * * *'
+  schedule:
+    - cron: "*/5 * * * *"
   
   workflow_dispatch: # Ручной запуск
 
