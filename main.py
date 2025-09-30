@@ -19,9 +19,9 @@ bot = telebot.TeleBot(telegram_bot_key)
 # )
 
 op = webdriver.ChromeOptions()
-# op.add_argument('--headless')
-# op.add_argument("--no-sandbox")
-# op.add_argument("--disable-dev-shm-usage")
+op.add_argument('--headless')
+op.add_argument("--no-sandbox")
+op.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=op)
 
 driver.maximize_window()
@@ -141,7 +141,7 @@ for event_content in events_content:
                         print(f"Время: {times__time} - {times__amount}")
                         message += f"Время: {times__time} - {times__amount}" + "\n"
                     message += "\n"
-                    
+
         except NoSuchElementException:
             times__item = driver.find_elements(By.CLASS_NAME, "times__item")
 
