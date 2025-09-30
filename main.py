@@ -19,9 +19,9 @@ bot = telebot.TeleBot(telegram_bot_key)
 # )
 
 op = webdriver.ChromeOptions()
-# op.add_argument('--headless')
-# op.add_argument("--no-sandbox")
-# op.add_argument("--disable-dev-shm-usage")
+op.add_argument('--headless')
+op.add_argument("--no-sandbox")
+op.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=op)
 
 driver.maximize_window()
