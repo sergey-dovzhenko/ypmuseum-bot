@@ -1,0 +1,56 @@
+name: Python application
+
+on:
+  # schedule: # Запускаем ежедневно в 08:15 утра UTC
+    # - cron: '00 5 * * *'
+  
+  workflow_dispatch: # Ручной запуск
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    # permissions:
+    #   contents: write   # allows read/write access to private repositories
+    #   pull-requests: write
+    #   issues: none
+    #   checks: write     # enables running tests and other CI tasks
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run search bonds by criteria
+      run: |
+        python main.py
+    # - name: Upload artifacts
+    #   if: success()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: bonds-xlsx
+    #     path: bond_search_results.xlsx
+    # # - name: Upload artifacts
+    # #   if: success()
+    # #   uses: actions/upload-artifact@v4
+    # #   with:
+    # #     name: bonds-txt
+    # #     path: bonds.txt
+    # - name: Commit Changes Back to Repo
+    #   shell: bash
+    #   run: |
+    #     git config user.name github-actions
+    #     git config user.email github-actions@github.com
+    #     git add .
+    #     git diff-index --quiet HEAD || git commit -m "Updated bonds data $(date +'%Y-%m-%d %H:%M:%S')"
+    #     git push origin main
