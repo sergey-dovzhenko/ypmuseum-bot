@@ -2,9 +2,26 @@ name: Python application
 
 on:
   schedule:
+    - cron: "40 20 * * *"   # 23:40 MSK
+    - cron: "43 20 * * *"   # 23:43 MSK
+    - cron: "46 20 * * *"   # 23:46 MSK
+    - cron: "49 20 * * *"   # 23:46 MSK
+    - cron: "52 20 * * *"   # 23:46 MSK
+    - cron: "55 20 * * *"   # 23:46 MSK
+    - cron: "58 20 * * *"   # 23:46 MSK
+    - cron: "0 21 * * *"   # 23:46 MSK
+    
     - cron: "5 21 * * *"   # 00:05 MSK
+    - cron: "8 21 * * *"   # 00:05 MSK
+    - cron: "10 21 * * *"   # 00:05 MSK
+    - cron: "12 21 * * *"  # 00:15 MSK
     - cron: "15 21 * * *"  # 00:15 MSK
+    - cron: "18 21 * * *"  # 00:15 MSK
+    - cron: "20 21 * * *"  # 00:15 MSK
+    - cron: "25 21 * * *"  # 00:15 MSK
     - cron: "30 21 * * *"  # 00:30 MSK
+    - cron: "35 21 * * *"  # 00:30 MSK
+    - cron: "40 21 * * *"  # 00:30 MSK
     - cron: "45 21 * * *"  # 00:45 MSK
   
   workflow_dispatch:
