@@ -14,9 +14,9 @@ bot = telebot.TeleBot(telegram_bot_key)
 
 # Настройки браузера
 options = Options()
-options.add_argument("--headless")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+# options.add_argument("--headless")
+# options.add_argument("--no-sandbox")
+# options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
 
 BASE_URL = "https://ypmuseum.tn-cloud.ru/?id=1&sid=43"
@@ -61,6 +61,8 @@ def parse_event(event_name: str) -> str:
                             EC.presence_of_all_elements_located((By.CLASS_NAME, "times__item"))
                         )
 
+                        print(slider)
+
                         day = slider.find_element(By.CLASS_NAME, "slide__day").text
                         month = slider.find_element(By.CLASS_NAME, "slide__month").text
                         weekday = slider.find_element(By.CLASS_NAME, "slide__weekday-text").text
@@ -95,12 +97,13 @@ if __name__ == "__main__":
 
     for event in events_to_check:
         msg = parse_event(event)
-        if msg:
-            bot.send_message(
-                chat_id=telegram_chat_id,
-                text=msg,
-                disable_web_page_preview=True,
-                parse_mode="Markdown"
-            )
+        print(msg)
+        # if msg:
+        #     bot.send_message(
+        #         chat_id=telegram_chat_id,
+        #         text=msg,
+        #         disable_web_page_preview=True,
+        #         parse_mode="Markdown"
+        #     )
 
     driver.quit()
