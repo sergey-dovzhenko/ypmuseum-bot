@@ -1,4 +1,4 @@
-import os
+# import os
 import telebot
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
-import time
+# import time
 
 telegram_bot_key = "8127384745:AAH9Ce83P1lYegIOrRlW261g4YVvl9WXKyg"
 telegram_chat_id = "-1003192948647"
